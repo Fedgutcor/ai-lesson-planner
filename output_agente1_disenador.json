@@ -1,0 +1,18 @@
+{
+  "objetivos_aprendizaje": [
+    "Definir y explicar el concepto de Prompt Engineering",
+    "Identificar y aplicar técnicas de Prompt Engineering para mejorar la precisión de modelos de lenguaje",
+    "Diseñar y evaluar prompts efectivos para diferentes aplicaciones de IA"
+  ],
+  "conceptos_clave": [
+    "Prompt Engineering",
+    "modelos de lenguaje",
+    "procesamiento de lenguaje natural"
+  ],
+  "prerequisitos": [
+    "Conocimientos básicos de programación en Python",
+    "Familiaridad con conceptos de inteligencia artificial y aprendizaje automático"
+  ],
+  "duracion_sugerida": "45 minutos",
+  "nivel_dificultad": 3
+}

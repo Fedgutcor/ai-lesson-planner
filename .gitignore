@@ -1,0 +1,40 @@
+# Planes generados
+planes/
+
+# Archivos de sistema
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Archivos de configuración local con API keys
+config.local.rb
+.env
+.env.local
+
+# Archivos temporales de Ruby
+*.gem
+*.rbc
+.bundle
+.config
+coverage
+InstalledFiles
+lib/bundler/man
+pkg
+rdoc
+spec/reports
+test/tmp
+test/version_tmp
+tmp
+
+# Documentación
+doc/
+.yardoc
+
+# Archivos de IDE
+.idea/
+.vscode/
+*.sublime-*

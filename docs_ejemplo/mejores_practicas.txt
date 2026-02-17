@@ -1,0 +1,28 @@
+MEJORES PRÁCTICAS PARA ENSEÑAR LANGCHAIN
+
+1. Empezar con conceptos básicos
+   - Explicar qué son los LLMs primero
+   - Mostrar ejemplos simples de prompts
+   - Introducir gradualmente la complejidad
+
+2. Demostrar con código en vivo
+   - Los estudiantes aprenden mejor viendo
+   - Hacer debugging en tiempo real
+   - Explicar errores comunes
+
+3. Proyectos prácticos importantes
+   - Chatbot simple
+   - Sistema de Q&A sobre PDFs
+   - Agente que consulta APIs
+
+4. Errores comunes a evitar
+   - No explicar límites de tokens
+   - Asumir conocimiento previo de Python
+   - Olvidar mencionar costos de API
+   - No enseñar gestión de errores
+
+5. Recursos recomendados
+   - Documentación oficial de LangChain
+   - Tutoriales de YouTube de Sam Witteveen
+   - Curso de DeepLearning.AI
+   - Repositorio de ejemplos en GitHub
