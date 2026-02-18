@@ -12,6 +12,7 @@ planes/
 
 # Archivos de configuración local con API keys
 config.local.rb
+config.yml
 .env
 .env.local
 

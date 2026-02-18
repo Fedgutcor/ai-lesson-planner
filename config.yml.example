@@ -1,0 +1,48 @@
+# Configuración de APIs para AI Lesson Planner
+
+# Proveedor por defecto (groq, claude, openai)
+default_provider: groq
+
+# APIs de Groq (se rotan automáticamente para load balancing)
+groq:
+  api_keys:
+    - gsk_YOUR_GROQ_API_KEY_1_HERE
+    - gsk_YOUR_GROQ_API_KEY_2_HERE  # Opcional: para load balancing
+  models:
+    default: llama-3.3-70b-versatile
+    vision: meta-llama/llama-4-scout-17b-16e-instruct
+  base_url: https://api.groq.com/openai/v1/chat/completions
+
+# API de Claude (Anthropic)
+claude:
+  api_key: YOUR_CLAUDE_API_KEY_HERE
+  models:
+    default: claude-sonnet-4-5-20250929
+    opus: claude-opus-4-6
+    haiku: claude-haiku-4-5-20251001
+  base_url: https://api.anthropic.com/v1/messages
+
+# API de OpenAI (opcional, para futuro)
+openai:
+  api_key: YOUR_OPENAI_API_KEY_HERE
+  models:
+    default: gpt-4-turbo-preview
+    vision: gpt-4-vision-preview
+  base_url: https://api.openai.com/v1/chat/completions
+
+# Configuración de uso por agente (opcional)
+# Si no se especifica, usa el proveedor por defecto
+agent_providers:
+  agente1: groq  # Diseñador Curricular
+  agente2: groq  # Creador de Contenido
+  agente3: groq  # Curador de Recursos
+  agente4: groq  # Generador de Evaluaciones
+  agente5: groq  # Actividades Interactivas
+  vision: groq   # Análisis de imágenes
+
+# Configuración avanzada
+settings:
+  auto_fallback: true      # Si un proveedor falla, intenta con otro
+  load_balance: true       # Distribuye carga entre API keys disponibles
+  max_retries: 3          # Reintentos por API call
+  timeout: 120            # Timeout en segundos

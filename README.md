@@ -1,6 +1,16 @@
 # 🎓 AI Lesson Planner - Sistema Multi-Agente
 
-Generador de planes de clase completos usando un sistema de 4 agentes de IA especializados, con soporte para documentos (PDFs, texto, imágenes) como contexto base.
+Generador de planes de clase completos usando un sistema de 5 agentes de IA especializados, con soporte para documentos (PDFs, texto, imágenes) como contexto base.
+
+## 🆕 Nuevas Características (v2.0)
+
+- ✨ **Web UI Interactiva** - Interfaz web intuitiva con Sinatra
+- 🤖 **Multi-API Support** - Groq, Claude, OpenAI (futuro)
+- ⚖️ **Load Balancing** - Rotación automática entre múltiples API keys
+- 📊 **Taxonomía de Bloom** - Objetivos clasificados por nivel cognitivo
+- 📝 **Rúbricas Detalladas** - Evaluaciones con 4 niveles de desempeño
+- 🎮 **Agente 5** - Diseñador de actividades interactivas
+- 📄 **Export HTML/PDF** - Planes en formato profesional compartible
 
 ## ✨ Características
 
@@ -41,25 +51,74 @@ ruby --version
 pip3 install PyPDF2
 ```
 
-### API Key de Groq
+### Configuración de APIs
 
-1. Obtén tu API key gratis en [https://console.groq.com](https://console.groq.com)
-2. Configura la variable de entorno:
+**Archivo:** `config.yml`
 
 ```bash
-# Opción 1: Variable de entorno temporal
-export GROQ_API_KEY=tu_key_aqui
+# 1. Copiar ejemplo
+cp config.yml.example config.yml
 
-# Opción 2: Crear archivo .env (recomendado)
-cp .env.example .env
-# Edita .env y agrega tu key
+# 2. Editar config.yml y agregar tus API keys
 ```
 
-**Nota:** Nunca subas tu API key a Git. El archivo `.env` está en `.gitignore`.
+**Proveedores soportados:**
+
+1. **Groq** (Recomendado - Rápido y Gratuito)
+   - Obtén keys en: https://console.groq.com
+   - Soporta múltiples keys para load balancing
+   - Modelo: Llama 3.3 70B
+
+2. **Claude (Anthropic)**
+   - Obtén key en: https://console.anthropic.com
+   - Modelo: Claude Sonnet 4.5
+   - Mayor calidad, más costoso
+
+3. **OpenAI** (Próximamente)
+   - GPT-4 Turbo
+
+**Ejemplo config.yml:**
+
+```yaml
+default_provider: groq
+
+groq:
+  api_keys:
+    - gsk_key1_here
+    - gsk_key2_here  # Opcional: para load balancing
+
+claude:
+  api_key: sk-ant-key_here
+
+settings:
+  auto_fallback: true      # Cambiar a otro proveedor si uno falla
+  load_balance: true       # Rotar entre múltiples keys
+```
+
+**Nota:** `config.yml` está en `.gitignore` para proteger tus keys.
 
 ## 📖 Uso
 
-### Modo CLI
+### 🌐 Web UI (Recomendado)
+
+**Inicio rápido:**
+
+```bash
+./start_ui.sh
+```
+
+Luego abre tu navegador en: **http://localhost:4567**
+
+**Características de la Web UI:**
+- ✨ Interfaz visual intuitiva
+- 📊 Progreso en tiempo real
+- 📁 Explorador de planes generados
+- 🎨 Diseño moderno y responsive
+- 🚀 Un solo clic para generar
+
+---
+
+### 💻 Modo CLI (Avanzado)
 
 ```bash
 ruby lesson_planner.rb "Tema" "Nivel" "/ruta/al/directorio/de/documentos"
