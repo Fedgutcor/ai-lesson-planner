@@ -5,6 +5,7 @@ require 'net/http'
 require 'json'
 require 'uri'
 require 'base64'
+require_relative 'html_exporter'
 
 # Intentar cargar pdf-reader (opcional)
 begin
@@ -312,14 +313,31 @@ def agente_disenador(tema, nivel, contexto_docs = nil)
     - Si los documentos no cubren cierto aspecto del tema, NO lo incluyas
     RESTRICCIONES
 
+    🎯 TAXONOMÍA DE BLOOM:
+    Clasifica los objetivos según los 6 niveles cognitivos de Bloom, usando verbos apropiados:
+
+    1. RECORDAR (Nivel básico): Definir, Listar, Identificar, Nombrar, Reconocer, Recordar
+    2. COMPRENDER: Explicar, Describir, Interpretar, Resumir, Clasificar, Comparar
+    3. APLICAR: Implementar, Ejecutar, Usar, Demostrar, Aplicar, Resolver
+    4. ANALIZAR: Analizar, Diferenciar, Organizar, Atribuir, Comparar, Deconstruir
+    5. EVALUAR: Evaluar, Criticar, Juzgar, Revisar, Validar, Justificar
+    6. CREAR (Nivel avanzado): Diseñar, Construir, Planificar, Producir, Inventar, Generar
+
     Genera SOLO un JSON válido con esta estructura:
     {
-      "objetivos_aprendizaje": ["objetivo 1", "objetivo 2", "objetivo 3"],
+      "objetivos_aprendizaje": {
+        "recordar_comprender": ["objetivo nivel básico 1", "objetivo nivel básico 2"],
+        "aplicar_analizar": ["objetivo nivel intermedio 1", "objetivo nivel intermedio 2"],
+        "evaluar_crear": ["objetivo nivel avanzado 1"]
+      },
       "conceptos_clave": ["concepto 1", "concepto 2", "concepto 3"],
       "prerequisitos": ["requisito 1", "requisito 2"],
       "duracion_sugerida": "45 minutos",
       "nivel_dificultad": 3
     }
+
+    IMPORTANTE: Asegura progresión cognitiva. Para nivel "Principiante" enfócate en Recordar/Comprender/Aplicar.
+    Para "Intermedio" incluye Aplicar/Analizar. Para "Avanzado" incluye Analizar/Evaluar/Crear.
 
     Responde ÚNICAMENTE con el JSON, sin texto adicional.
   PROMPT
@@ -485,33 +503,59 @@ def agente_evaluador(tema, nivel, diseño, contenido, contexto_docs = nil)
     - Si un concepto no está en los documentos, NO lo evalúes
     RESTRICCIONES
 
-    Crea una EVALUACIÓN COMPLETA Y VARIADA con:
+    Crea una EVALUACIÓN COMPLETA Y VARIADA con RÚBRICAS DETALLADAS:
 
     ## 1. PREGUNTAS DE OPCIÓN MÚLTIPLE (5 preguntas)
     - Cada pregunta con 4 opciones (A, B, C, D)
     - Marca la respuesta correcta con [✓]
     - Incluye una breve explicación de por qué es correcta
 
-    ## 2. PREGUNTAS ABIERTAS (3 preguntas)
+    ## 2. PREGUNTAS ABIERTAS CON RÚBRICA (3 preguntas)
     - Preguntas que requieran análisis y pensamiento crítico
     - Incluye una respuesta modelo para el docente
-    - Incluye criterios de evaluación (rúbrica simple)
 
-    ## 3. EJERCICIOS PRÁCTICOS (2 ejercicios)
+    **IMPORTANTE: Para CADA pregunta abierta, incluye una RÚBRICA con este formato:**
+
+    | Criterio | Excelente (4 pts) | Bueno (3 pts) | Suficiente (2 pts) | Insuficiente (1 pt) |
+    |----------|-------------------|---------------|---------------------|---------------------|
+    | [Nombre criterio 1] | [Descripción nivel 4] | [Descripción nivel 3] | [Descripción nivel 2] | [Descripción nivel 1] |
+    | [Nombre criterio 2] | [Descripción nivel 4] | [Descripción nivel 3] | [Descripción nivel 2] | [Descripción nivel 1] |
+    | [Nombre criterio 3] | [Descripción nivel 4] | [Descripción nivel 3] | [Descripción nivel 2] | [Descripción nivel 1] |
+
+    **Puntos totales:** /12
+
+    ## 3. EJERCICIOS PRÁCTICOS CON RÚBRICA (2 ejercicios)
     - Ejercicios hands-on aplicando los conceptos
     - Paso a paso de la solución para el docente
     - Estimación de tiempo de resolución
 
-    ## 4. CASO DE ESTUDIO / PROYECTO MINI (1)
+    **IMPORTANTE: Para CADA ejercicio práctico, incluye una RÚBRICA con al menos 4 criterios:**
+    - Corrección técnica
+    - Completitud
+    - Documentación/Explicación
+    - Creatividad/Optimización (si aplica)
+
+    ## 4. CASO DE ESTUDIO / PROYECTO MINI CON RÚBRICA (1)
     - Situación realista donde aplicar lo aprendido
     - Preguntas guía para el estudiante
     - Solución propuesta para el docente
 
+    **IMPORTANTE: Incluye RÚBRICA COMPREHENSIVA con 5-6 criterios evaluando:**
+    - Análisis del problema
+    - Propuesta de solución
+    - Implementación/Ejecución
+    - Justificación y argumentación
+    - Presentación y comunicación
+    - Pensamiento crítico
+
     ## 5. PREGUNTAS DE REFLEXIÓN (2 preguntas)
     - Preguntas metacognitivas para que el estudiante reflexione sobre su aprendizaje
     - Ejemplos de respuestas esperadas
+    - Rúbrica simple (Completa/Parcial/Incompleta)
 
     Haz las preguntas INTERACTIVAS, ENGANCHADORAS y RELEVANTES para el nivel #{nivel}.
+
+    Las rúbricas deben ser ESPECÍFICAS, MEDIBLES y CLARAS para que cualquier docente pueda usarlas.
   PROMPT
 
   resultado = call_groq(system_prompt, user_prompt)
@@ -527,7 +571,95 @@ def agente_evaluador(tema, nivel, diseño, contenido, contexto_docs = nil)
 end
 
 # ============================================
-# ORQUESTADOR: Coordina los 4 agentes
+# AGENTE 5: DISEÑADOR DE ACTIVIDADES INTERACTIVAS
+# ============================================
+
+def agente_actividades_interactivas(tema, nivel, diseño, contenido)
+  puts "\n🎮 AGENTE 5: Diseñador de Actividades Interactivas trabajando..."
+  start_time = Time.now
+
+  system_prompt = "Eres un diseñador instruccional experto en crear actividades interactivas y dinámicas para el aprendizaje activo."
+
+  user_prompt = <<~PROMPT
+    Tema: "#{tema}" (Nivel: #{nivel})
+
+    Objetivos: #{diseño['objetivos_aprendizaje']}
+    Conceptos clave: #{diseño['conceptos_clave']}
+
+    Diseña ACTIVIDADES INTERACTIVAS Y DINÁMICAS para mantener el engagement:
+
+    ## 1. ACTIVIDADES INDIVIDUALES INTERACTIVAS (3 actividades)
+
+    Para cada actividad especifica:
+    - **Nombre:** Título atractivo
+    - **Tipo:** (Quiz interactivo, Drag & Drop, Fill in the blanks, Hotspot, etc.)
+    - **Duración:** Tiempo estimado
+    - **Objetivo:** Qué objetivo de Bloom trabaja
+    - **Descripción:** Cómo funciona paso a paso
+    - **Herramienta sugerida:** (H5P, Kahoot, Quizizz, Mentimeter, etc.)
+    - **Instrucciones de creación:** Pasos para el docente
+
+    ## 2. ACTIVIDADES COLABORATIVAS (2-3 actividades)
+
+    Para cada actividad especifica:
+    - **Nombre:** Título descriptivo
+    - **Formato:** (Grupos pequeños, Parejas, Plenaria)
+    - **Duración:** Tiempo estimado
+    - **Objetivo:** Qué desarrolla (colaboración, pensamiento crítico, etc.)
+    - **Instrucciones para estudiantes:**
+    - **Rol del facilitador/docente:**
+    - **Entregable esperado:**
+
+    ## 3. BREAKOUT ROOMS / DINÁMICAS DE GRUPO (para clases síncronas)
+
+    Diseña 2 dinámicas con:
+    - **Actividad:** Qué harán los grupos
+    - **Tamaño de grupo:** Número de personas
+    - **Tiempo:** Duración
+    - **Consigna clara:** Instrucciones paso a paso
+    - **Preguntas guía:** Para mantener el foco
+    - **Puesta en común:** Cómo socializar resultados
+
+    ## 4. GAMIFICACIÓN (1 propuesta)
+
+    Propón un sistema de gamificación simple:
+    - **Mecánica:** Puntos, badges, niveles, etc.
+    - **Reglas:** Cómo se ganan puntos
+    - **Recompensas:** Qué obtienen los estudiantes
+    - **Tabla de posiciones:** Cómo trackear progreso
+
+    ## 5. TIMELINE DE ACTIVIDADES (Distribución temporal)
+
+    Crea un timeline clase por clase:
+    ```
+    📅 Sesión 1 (45 min):
+    0-5 min: [Actividad]
+    5-20 min: [Actividad]
+    20-35 min: [Actividad]
+    35-45 min: [Actividad]
+
+    📅 Sesión 2 (45 min):
+    ...
+    ```
+
+    Haz las actividades ENGANCHADORAS, PRÁCTICAS y alineadas con el nivel #{nivel}.
+    Incluye variedad: individual, grupal, digital, analógica.
+  PROMPT
+
+  resultado = call_groq(system_prompt, user_prompt)
+  elapsed = Time.now - start_time
+
+  if resultado.nil? || resultado.strip.empty?
+    puts "❌ Agente 5 falló (#{elapsed.round(2)}s)"
+    return "**Error:** No se pudieron generar actividades interactivas."
+  end
+
+  puts "✅ Agente 5 completado (#{elapsed.round(2)}s)"
+  resultado
+end
+
+# ============================================
+# ORQUESTADOR: Coordina los 5 agentes
 # ============================================
 
 def generar_plan_clase(tema, nivel, directorio_docs = nil)
@@ -540,7 +672,7 @@ def generar_plan_clase(tema, nivel, directorio_docs = nil)
 
   puts "\n" + "="*60
   puts "🤖 GENERADOR DE PLANES DE CLASE - SISTEMA MULTI-AGENTE"
-  puts "   (4 AGENTES TRABAJANDO EN EQUIPO)"
+  puts "   (5 AGENTES TRABAJANDO EN EQUIPO)"
   puts "="*60
   puts "\n📋 Tema: #{tema}"
   puts "📊 Nivel: #{nivel}"
@@ -611,6 +743,19 @@ def generar_plan_clase(tema, nivel, directorio_docs = nil)
     end
   end
 
+  # AGENTE 5: Generar actividades interactivas
+  actividades = agente_actividades_interactivas(tema, nivel, diseño, contenido)
+
+  # GUARDAR OUTPUT DEL AGENTE 5
+  if actividades && actividades.strip.length > 50
+    File.write("#{output_dir}/agente5_actividades.md", actividades)
+    puts "📄 Output Agente 5 guardado"
+  else
+    puts "⚠️  Agente 5 no generó contenido válido"
+    actividades = "Error: No se pudieron generar actividades interactivas"
+    File.write("#{output_dir}/agente5_actividades.md", actividades)
+  end
+
   # COMPILAR RESULTADO FINAL
   plan = <<~PLAN
     # Plan de Clase: #{tema}
@@ -621,9 +766,19 @@ def generar_plan_clase(tema, nivel, directorio_docs = nil)
 
     ---
 
-    ## 🎯 Objetivos de Aprendizaje
+    ## 🎯 Objetivos de Aprendizaje (Taxonomía de Bloom)
 
-    #{diseño['objetivos_aprendizaje']&.map { |obj| "- #{obj}" }&.join("\n")}
+    #{if diseño['objetivos_aprendizaje'].is_a?(Hash)
+        bloom_output = ""
+        bloom_output += "### 🔵 Recordar/Comprender (Fundamentos)\n#{diseño['objetivos_aprendizaje']['recordar_comprender']&.map { |obj| "- #{obj}" }&.join("\n")}\n\n" if diseño['objetivos_aprendizaje']['recordar_comprender']
+        bloom_output += "### 🟢 Aplicar/Analizar (Intermedio)\n#{diseño['objetivos_aprendizaje']['aplicar_analizar']&.map { |obj| "- #{obj}" }&.join("\n")}\n\n" if diseño['objetivos_aprendizaje']['aplicar_analizar']
+        bloom_output += "### 🟠 Evaluar/Crear (Avanzado)\n#{diseño['objetivos_aprendizaje']['evaluar_crear']&.map { |obj| "- #{obj}" }&.join("\n")}" if diseño['objetivos_aprendizaje']['evaluar_crear']
+        bloom_output
+      else
+        # Fallback for old format
+        diseño['objetivos_aprendizaje']&.map { |obj| "- #{obj}" }&.join("\n")
+      end
+    }
 
     ## 📚 Conceptos Clave
 
@@ -653,7 +808,13 @@ def generar_plan_clase(tema, nivel, directorio_docs = nil)
 
     ---
 
-    _✨ Generado por Sistema Multi-Agente (4 agentes) con Groq + Llama 3.3_
+    ## 🎮 Actividades Interactivas
+
+    #{actividades}
+
+    ---
+
+    _✨ Generado por Sistema Multi-Agente (5 agentes) con Groq + Llama 3.3_
   PLAN
 
   # GUARDAR PLAN COMPLETO
@@ -673,7 +834,16 @@ def generar_plan_clase(tema, nivel, directorio_docs = nil)
 
 ## 🎯 Objetivos de Aprendizaje
 
-#{diseño['objetivos_aprendizaje']&.map { |obj| "- #{obj}" }&.join("\n")}
+#{if diseño['objetivos_aprendizaje'].is_a?(Hash)
+    bloom_readme = []
+    bloom_readme += diseño['objetivos_aprendizaje']['recordar_comprender']&.map { |obj| "- 🔵 #{obj}" } || []
+    bloom_readme += diseño['objetivos_aprendizaje']['aplicar_analizar']&.map { |obj| "- 🟢 #{obj}" } || []
+    bloom_readme += diseño['objetivos_aprendizaje']['evaluar_crear']&.map { |obj| "- 🟠 #{obj}" } || []
+    bloom_readme.join("\n")
+  else
+    diseño['objetivos_aprendizaje']&.map { |obj| "- #{obj}" }&.join("\n")
+  end
+}
 
 ## 📚 Conceptos Clave
 
@@ -694,6 +864,7 @@ def generar_plan_clase(tema, nivel, directorio_docs = nil)
 | `agente2_contenido.md` | Contenido de la clase (intro, desarrollo, práctica) | Agente 2: Creador de Contenido |
 | `agente3_recursos.md` | Herramientas y recursos recomendados | Agente 3: Curador de Recursos |
 | `agente4_evaluacion.md` | Test y evaluaciones completas | Agente 4: Generador de Evaluaciones |
+| `agente5_actividades.md` | Actividades interactivas y dinámicas | Agente 5: Diseñador de Actividades |
 
 ---
 
@@ -709,12 +880,13 @@ def generar_plan_clase(tema, nivel, directorio_docs = nil)
 
 ## 🤖 Sistema Multi-Agente
 
-Este plan fue generado por un sistema de 4 agentes de IA trabajando en equipo:
+Este plan fue generado por un sistema de 5 agentes de IA trabajando en equipo:
 
-- **Agente 1:** Analiza el tema y diseña la estructura curricular
+- **Agente 1:** Analiza el tema y diseña la estructura curricular (con Taxonomía de Bloom)
 - **Agente 2:** Crea el contenido educativo con ejemplos prácticos
 - **Agente 3:** Recomienda herramientas y recursos específicos
-- **Agente 4:** Genera evaluaciones variadas e interactivas
+- **Agente 4:** Genera evaluaciones variadas con rúbricas detalladas
+- **Agente 5:** Diseña actividades interactivas y dinámicas de engagement
 
 Cada agente se especializa en su área y pasa información al siguiente.
 
@@ -738,11 +910,16 @@ _✨ Generado por Sistema Multi-Agente con Groq + Llama 3.3_
   puts "\n📄 Archivos generados:"
   puts "   - README.md                     ⭐ Resumen ejecutivo"
   puts "   - plan_completo.md              (Plan completo)"
-  puts "   - agente1_disenador.json        (Diseño curricular)"
+  puts "   - agente1_disenador.json        (Diseño curricular + Bloom)"
   puts "   - agente2_contenido.md          (Contenido de clase)"
   puts "   - agente3_recursos.md           (Herramientas y recursos)"
-  puts "   - agente4_evaluacion.md         (Test y evaluaciones)"
+  puts "   - agente4_evaluacion.md         (Test y evaluaciones + Rúbricas)"
+  puts "   - agente5_actividades.md        (Actividades interactivas)"
   puts "\n💡 Abre #{output_dir}/README.md para empezar"
+
+  # EXPORTAR A HTML (convertible a PDF desde navegador)
+  puts "\n📄 Exportando a HTML/PDF..."
+  HTMLExporter.export(output_dir)
 
   { plan: plan, output_dir: output_dir, diseño: diseño }
 end
